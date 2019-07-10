@@ -1,0 +1,31 @@
+processors:
+ - drop_event:
+     when:
+        or:
+           - regexp:
+              message: "^#"
+           - regexp:
+              message: "^ "
+           - regexp:
+              message: "null$"
+ - include_fields:
+     fields: ["fields","message"]
+filebeat.prospectors:
+- type: log
+  enabled: true
+  paths:
+    - /usr/local/httpdump/log/*
+  fields:
+    index: linux-cc
+    log_topics: ddos
+- type: log
+  enabled: true
+  paths:
+    - /usr/local/uskyflow/sendDir/*.flow
+  fields:
+    index: nginx-flow
+    log_topics: flow
+output.kafka:
+  hosts: ["103.118.36.200:9092", "103.118.36.201:9092", "103.118.36.202:9092"]
+  topic: '%{[fields][log_topics]}'
+  compression: gzip
